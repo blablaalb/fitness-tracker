@@ -32,7 +32,8 @@ import {TrainingService} from "./training/training.service";
     WelcomeComponent,
     HeaderComponent,
     SidenavListComponent,
-    StopTrainingComponent
+    StopTrainingComponent,
+    PastTrainingsComponent
   ],
   imports: [
     BrowserModule,
