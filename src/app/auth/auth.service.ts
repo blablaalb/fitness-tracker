@@ -7,6 +7,8 @@ import { Router } from "@angular/router";
 
 import { AngularFireAuth } from '@angular/fire/compat/auth';
 import { TrainingService } from "../training/training.service";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { UIService } from "../shared/ui.service";
 
 
 @Injectable()
@@ -14,7 +16,7 @@ export class AuthService {
   authChange = new Subject<boolean>();
   private isAuthenticated = false;
 
-  constructor(private router: Router, private afAuth: AngularFireAuth, private trainingService: TrainingService) {
+  constructor(private router: Router, private afAuth: AngularFireAuth, private trainingService: TrainingService, private uiService: UIService) {
   }
 
   initAuthListener() {
@@ -26,24 +28,29 @@ export class AuthService {
       } else {
         this.trainingService.cancelSubscriptions();
         this.isAuthenticated = false;
-        this.authChange.next(true);
+        this.authChange.next(false);
         this.router.navigate(['/login']);
       }
     });
   }
 
   registerUser(authData: AuthData): void {
+    this.uiService.loadingStateChanged.next(true);
     this.afAuth.createUserWithEmailAndPassword(authData.email, authData.password).then(result => {
+      this.uiService.loadingStateChanged.next(false);
     }).catch(error => {
-      console.log(error);
+      this.uiService.loadingStateChanged.next(false);
+      this.uiService.showSnackbar(error.message, null, 3000);
     });
   }
 
   login(authData: AuthData): void {
+    this.uiService.loadingStateChanged.next(true);
     this.afAuth.signInWithEmailAndPassword(authData.email, authData.password).then(result => {
-      console.log(result);
+      this.uiService.loadingStateChanged.next(false);
     }).catch(error => {
-      console.log(error);
+      this.uiService.loadingStateChanged.next(false);
+      this.uiService.showSnackbar(error.message, null, 3000);
     });
   }
 
@@ -52,6 +59,7 @@ export class AuthService {
   }
 
   isAuth(): boolean {
+    console.log(this.isAuthenticated);
     return this.isAuthenticated;
   }
 
